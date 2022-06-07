@@ -411,6 +411,7 @@ bootstrap_pants() {
     else
       echo "Chosen Python $_PYENV_PYVER (from pyenv) as the local Pants interpreter"
     fi
+    export PY=$(pyenv prefix $_PYENV_PYVER)/bin/python
     echo "PY=\$(pyenv prefix $_PYENV_PYVER)/bin/python" >> "$ROOT_PATH/.pants.env"
     if [ -d tools/pants-src ]; then
       rm -rf tools/pants-src
@@ -529,7 +530,8 @@ if [ "$DISTRO" = "Darwin" -a "$(uname -p)" = "arm" ]; then
   fi
   pip install -U -q pip setuptools wheel
   # ref: https://github.com/grpc/grpc/issues/28387
-  pip wheel -w ./wheelhouse --no-binary :all: grpcio grpcio-tools
+  GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 CFLAGS="-I/opt/homebrew/opt/openssl/include" LDFLAGS="-L/opt/homebrew/opt/openssl/lib" pip wheel -w ./wheelhouse --no-binary :all: grpcio~=1.44.0 grpcio-tools~=1.44.0
+  GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 CFLAGS="-I/opt/homebrew/opt/openssl/include" LDFLAGS="-L/opt/homebrew/opt/openssl/lib" pip install --no-binary :all: grpcio~=1.44.0 grpcio-tools~=1.44.0 --ignore-installed --no-cache
   pyenv shell --unset
   pyenv uninstall -f tmp-grpcio-build
   echo "List of prebuilt wheels:"
@@ -553,6 +555,10 @@ sed_inplace "s/8110:6379/${REDIS_PORT}:6379/" "docker-compose.halfstack.current.
 sed_inplace "s/8120:2379/${ETCD_PORT}:2379/" "docker-compose.halfstack.current.yml"
 mkdir -p "${HALFSTACK_VOLUME_PATH}/postgres-data"
 mkdir -p "${HALFSTACK_VOLUME_PATH}/etcd-data"
+mkdir -p "${HALFSTACK_VOLUME_PATH}/redis-data"
+chmod 0777 "${HALFSTACK_VOLUME_PATH}/postgres-data"
+chmod 0777 "${HALFSTACK_VOLUME_PATH}/etcd-data"
+chmod 0777 "${HALFSTACK_VOLUME_PATH}/redis-data"
 $docker_sudo docker compose -f "docker-compose.halfstack.current.yml" up -d
 $docker_sudo docker compose -f "docker-compose.halfstack.current.yml" ps   # You should see three containers here.
 

@@ -11,4 +11,8 @@ if [ $? -ne 0 ]; then
 fi
 LOCKSET=${LOCKSET:-python-default/$PYTHON_VERSION}
 source dist/export/python/virtualenvs/$LOCKSET/bin/activate
+
+pip install --upgrade pip
+GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 CFLAGS="-I/opt/homebrew/opt/openssl/include" LDFLAGS="-L/opt/homebrew/opt/openssl/lib" pip install --no-binary :all: grpcio~=1.44.0 grpcio-tools~=1.44.0 --ignore-installed --no-cache
+
 PYTHONPATH=src python "$@"

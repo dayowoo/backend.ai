@@ -14,7 +14,7 @@ services:
       - POSTGRES_PASSWORD=develove
       - POSTGRES_DB=backend
     volumes:
-      - "./volumes/${DATADIR_PREFIX:-.}/postgres-data:/var/lib/postgresql/data:rw"
+      - "postgres:/var/lib/postgresql/data:rw"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
@@ -69,3 +69,6 @@ services:
 
 networks:
   half:
+
+volumes:
+  postgres: 
