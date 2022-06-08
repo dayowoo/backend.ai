@@ -594,7 +594,11 @@ sed_inplace "s/port = 8100/port = ${POSTGRES_PORT}/" ./manager.toml
 sed_inplace "s/port = 8081/port = ${MANAGER_PORT}/" ./manager.toml
 cp configs/manager/halfstack.alembic.ini ./alembic.ini
 sed_inplace "s/localhost:8100/localhost:${POSTGRES_PORT}/" ./alembic.ini
+
+export BACKENDAI_FIRST_INSTALL=1
 ./backend.ai mgr etcd put config/redis/addr "127.0.0.1:${REDIS_PORT}"
+unset BACKENDAI_FIRST_INSTALL
+
 cp configs/manager/sample.etcd.volumes.json ./dev.etcd.volumes.json
 MANAGER_AUTH_KEY=$(python -c 'import secrets; print(secrets.token_hex(32), end="")')
 sed_inplace "s/\"secret\": \"some-secret-shared-with-storage-proxy\"/\"secret\": \"${MANAGER_AUTH_KEY}\"/" ./dev.etcd.volumes.json
